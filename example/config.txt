@@ -1,0 +1,2 @@
+Prefix plugins/SparCC/example/
+Plugin SparCC inputfile fake_data.txt outputfile corr.sparcc.csv
