@@ -3,7 +3,7 @@
 # Input: CSV (abundances)
 # Output: CSV (correlations)
 # Dependency: Ensemble Plugin (Available at: https://github.com/movingpictures83/Ensemble)
-# Tested with: PluMA 1.0, Python 2.7
+# Tested with: PluMA 1.0, Python 3.6
 
 PluMA plugin that accepts an input file of abundances in CSV format, with rows
 representing samples and columns representing entities.  Entry (i, j) is then the abundance
