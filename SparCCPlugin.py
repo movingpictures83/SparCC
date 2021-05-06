@@ -22,7 +22,7 @@ class SparCCPlugin:
       for algorithm in self.dirs:
          for i in range(100):
             filename = "permutation_"+str(i)+".txt"
-            sys.argv = ["SparCC.py", filename, "-i", "5", "--cor_file=perm_cor_"+algorithm+"_"+str(i)+".txt", "-a", algorithm]
+            sys.argv = ["SparCC.py", filename, "-i", "5", "--cor_file=perm_cor_"+algorithm+"_"+str(i)+".txt", "-a", algorithm, "--pval_file=pval_"+algorithm]
             SparCC.driver()
 
       # Compute unified p-values
@@ -41,7 +41,7 @@ class SparCCPlugin:
       tmpfile = open(tmpfilename, 'r')
       firstline = tmpfile.readline().strip()
       OTUs = firstline.split('\t')
-      OTUs.remove('OTU_id')
+      #OTUs.remove('OTU_id')
       self.numnodes = len(OTUs)
       tmpfile.close()
 
@@ -67,11 +67,12 @@ class SparCCPlugin:
             lines.append(line)
 
          numlines = len(lines)
-         self.bacteria = firstline.split('\t')
-         self.bacteria.remove('OTU_id')
+         self.bacteria = firstline.strip().split('\t')
+         #self.bacteria.remove('OTU_id')
          numbac = len(self.bacteria)
 
          for i in range(numlines):
+            #print(lines[i])
             contents = lines[i].split('\t')
             if contents.count('\n') != 0:
                contents.remove('\n')
@@ -98,7 +99,7 @@ class SparCCPlugin:
          #for dir in self.dirs:
          #    correlations[dir] = numpy.zeros([numsamples, self.numnodes, self.numnodes])
          #    pvalues[dir] = numpy.zeros([self.numnodes, self.numnodes])
-         pvalues = numpy.zeros([self.numnodes, self.numnodes])
+         self.pvalues = numpy.zeros([self.numnodes, self.numnodes])
 
 
          #for dir in self.dirs:
@@ -119,59 +120,26 @@ class SparCCPlugin:
                 pline = pline.split('\t')
                 pline.remove(pline[0])
                 for j in range(self.numnodes):
-                      pvalues[i][j] = pline[j]
+                      self.pvalues[i][j] = pline[j]
 
-         p_thresh = 0.01
-         for i in range(self.numnodes):
-            for j in range(self.numnodes):
-               if (pvalues[i][j] > p_thresh):
-                  self.ADJ[i][j] = 0
-                  self.ADJ[j][i] = 0
-
-         # Run Brown's Method, merge P-values
-         #data_mat = numpy.zeros([len(self.dirs), 100])
-         #p_values = numpy.zeros(len(self.dirs))
-
-
-         # For each x and y:
-         #   Read one element from each sample matrix
-         #   Insert that element into the data matrix
-         #   Get the p-values from the two-sided files, insert them into the pvalue vector
-         #   Pass to the Brown function, the [0] element is the answer
-         #merged_p_values = []
-
-         #for x in range(self.numnodes):
-         #   print "MERGING PVALUES FOR OTU ", OTUs[x]
-         #   for y in range(self.numnodes):
-         #      for dir in self.dirs:
-         #         for sample in range(numsamples):
-         #            data_mat[self.dirs.index(dir)][sample] = correlations[dir][sample][x][y]
-         #         p_values[self.dirs.index(dir)] = pvalues[dir][x][y]
-         #      if (y > x):
-         #         merged_p_values.append((EmpiricalBrownsMethod.EmpiricalBrownsMethod(data_mat, p_values), (x, y)))
-
-         # Hochberg Method for Cutting Off Pvalues
-         #merged_p_values.sort()
-
-         #m = len(merged_p_values)
-         #q_star = 0.01   # What we use
-         #for i in range(1, m+1):
-         #   cutoff_P = (i/float(m))*q_star
-         #   print "INDEX: ", i, " PVALUE: ", merged_p_values[i-1][0], " self.ADJACENCY VALUE: ", self.ADJ[merged_p_values[i-1][1][0]][merged_p_values[i-1][1][1]]
-         #   if (merged_p_values[i-1][0] > cutoff_P):
-         #      print "CUTOFF HIT AT INDEX ", i, " PVALUE: ", merged_p_values[i-1][0], " CUTOFF P: ", cutoff_P
-         #      print "LENGTH OF MERGED VALUES: ", m
-         #      for j in range(i+1, m+1):
-         #         x = merged_p_values[j-1][1][0]
-         #         y = merged_p_values[j-1][1][1]
-         #         self.ADJ[x][y] = 0
-         #         self.ADJ[y][x] = 0
-         #      break
 
 
    def output(self, filename):
           filestuff2 = open(filename, 'w')
           filestuff2.write("\"\",")
+          
+          p_thresh = 0.01
+          if (filename.endswith("unthresholded.csv")):
+              p_thresh = 1
+          for i in range(self.numnodes):
+            for j in range(self.numnodes):
+               if (i == j):
+                   self.ADJ[i][j] = 1
+                   self.ADJ[j][i] = 1
+               elif (self.pvalues[i][j] > p_thresh):
+                  self.ADJ[i][j] = 0
+                  self.ADJ[j][i] = 0
+
 
           for i in range(self.numnodes):
              filestuff2.write(self.bacteria[i])
