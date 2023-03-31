@@ -9,7 +9,7 @@ class SparCCPlugin:
       #self.dirs = ["sparcc", "pearson", "spearman"]
       self.dirs = ["sparcc"]
       for algorithm in self.dirs:
-         sys.argv = ["SparCC.py", filename, '-i', '5', "--cor_file=cor_"+algorithm+".out", "-a", algorithm]
+         sys.argv = ["SparCC.py", filename, '-i', '100', "--cor_file=cor_"+algorithm+".out", "-a", algorithm]
          SparCC.driver()
       #   SparCC.driver(filename, ("-i", "5", "--cor_file=cor_"+algorithm+".out", "-a", algorithm))
 
@@ -68,6 +68,7 @@ class SparCCPlugin:
 
          numlines = len(lines)
          self.bacteria = firstline.strip().split('\t')
+         #self.bacteria = firstline.split('\t')
          #self.bacteria.remove('OTU_id')
          numbac = len(self.bacteria)
 
@@ -137,8 +138,11 @@ class SparCCPlugin:
                    self.ADJ[i][j] = 1
                    self.ADJ[j][i] = 1
                elif (self.pvalues[i][j] > p_thresh):
+                  #print(self.bacteria[i], self.bacteria[j], self.ADJ[i][j], self.pvalues[i][j])
                   self.ADJ[i][j] = 0
                   self.ADJ[j][i] = 0
+               #else:
+               #   print("PASSED:",self.bacteria[i],self.bacteria[j],self.ADJ[i][j], self.pvalues[i][j])
 
 
           for i in range(self.numnodes):
