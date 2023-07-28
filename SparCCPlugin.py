@@ -9,27 +9,27 @@ class SparCCPlugin:
       #self.dirs = ["sparcc", "pearson", "spearman"]
       self.dirs = ["sparcc"]
       for algorithm in self.dirs:
-         sys.argv = ["SparCC.py", filename, '-i', '100', "--cor_file=cor_"+algorithm+".out", "-a", algorithm]
+         sys.argv = ["SparCC.py", filename, '-i', '5', "--cor_file=cor_"+algorithm+".out", "-a", algorithm]
          SparCC.driver()
       #   SparCC.driver(filename, ("-i", "5", "--cor_file=cor_"+algorithm+".out", "-a", algorithm))
 
       # Generate 100 permutations of the input file
-      sys.argv = ["MakeBootstraps.py", filename, "-n", "100", "-t", "permutation_#.txt"]
+      sys.argv = ["MakeBootstraps.py", filename, "-n", "1000", "-t", "permutation_#.txt"]
       MakeBootstraps.driver()
 
    def run(self):
       # Run SparCC, Pearson, and Spearman correlations on all permutations
       for algorithm in self.dirs:
-         for i in range(100):
+         for i in range(1000):
             filename = "permutation_"+str(i)+".txt"
-            sys.argv = ["SparCC.py", filename, "-i", "5", "--cor_file=perm_cor_"+algorithm+"_"+str(i)+".txt", "-a", algorithm, "--pval_file=pval_"+algorithm]
+            sys.argv = ["SparCC.py", filename, "-i", "5", "--cor_file=perm_cor_"+algorithm+"_"+str(i)+".txt", "-a", algorithm]#, "--pval_file=pval_"+algorithm]
             SparCC.driver()
 
       # Compute unified p-values
       for algorithm in self.dirs:
          filename = "cor_"+algorithm+".out"
          filename2 = "perm_cor_"+algorithm+"_#.txt"
-         sys.argv = ["PseudoPvals.py", filename, filename2, "100", "-o" "pvals."+algorithm+".txt", "-t", "two_sided"]
+         sys.argv = ["PseudoPvals.py", filename, filename2, "1000", "-o" "pvals."+algorithm+".txt", "-t", "two_sided"]
          PseudoPvals.driver()
 
 
